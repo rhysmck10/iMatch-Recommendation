@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Your Recommendations</h1>
+
+{% if not has_ratings %}
+  <p>You don’t have ratings yet. Go rate a few movies first.</p>
+{% else %}
+  <div class="grid">
+    {% for r in recs %}
+      <div class="card">
+        <h3>{{ r.title }}</h3>
+        <div class="movie-subtle">⭐ Recommended</div>
+
+        {% if r.poster_url %}
+          <img class="poster" src="{{ r.poster_url }}" alt="Poster"/>
+        {% endif %}
+
+        {% if r.release_date %}
+          <p><small>Release: {{ r.release_date }}</small></p>
+        {% endif %}
+
+        {% if r.overview %}
+          <p>{{ r.overview }}</p>
+        {% endif %}
+        
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

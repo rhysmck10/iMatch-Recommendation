@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Liked Movies</h1>
+  <p>Movies you have rated highly.</p>
+</div>
+
+{% if liked %}
+  <div class="movie-list">
+    {% for movie in liked %}
+      <div class="movie-row">
+        <div>
+          <div class="movie-title">{{ movie["title"] }}</div>
+          <div class="movie-subtle">Movie ID: {{ movie["movie_id"] }}</div>
+          <div class="movie-subtle" style="margin-top: 6px;">
+            Your rating: <strong>{{ movie["rating"] }}</strong>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    You have not liked any movies yet.
+  </div>
+{% endif %}
+
+{% endblock %}

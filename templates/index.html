@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Rate Movies</h1>
+  <p>Rate at least 5 movies to generate personalised recommendations.</p>
+</div>
+
+<div class="controls">
+  <form method="get" action="{{ url_for('index') }}" class="search-form">
+    <input
+      type="text"
+      name="q"
+      placeholder="Search movies by title..."
+      value="{{ q if q else '' }}"
+    >
+    <button type="submit">Search</button>
+  </form>
+
+  <form method="get" action="{{ url_for('index') }}">
+    <button type="submit" class="button-secondary">Refresh Random Movies</button>
+  </form>
+</div>
+
+{% if q %}
+  <p class="movie-subtle" style="margin-bottom: 16px;">
+    Showing results for: <strong>{{ q }}</strong>
+  </p>
+{% else %}
+  <p class="movie-subtle" style="margin-bottom: 16px;">
+    Showing a random selection of movies.
+  </p>
+{% endif %}
+
+{% if movies %}
+  <div class="movie-list">
+    {% for m in movies %}
+      <div class="movie-row" id="movie-{{ m['movie_id'] }}">
+        <div>
+          <div class="movie-title">{{ m["title"] }}</div>
+          <div class="movie-subtle">Movie ID: {{ m["movie_id"] }}</div>
+
+          {% if m["movie_id"] in user_ratings %}
+            <div class="movie-subtle" style="margin-top: 6px;">
+              Your rating: <strong>{{ user_ratings[m["movie_id"]] }}</strong>
+            </div>
+          {% endif %}
+        </div>
+
+        <form method="post" action="{{ url_for('rate') }}" class="rate-form ajax-rate-form">
+          <input type="hidden" name="movie_id" value="{{ m['movie_id'] }}">
+          <input type="hidden" name="q" value="{{ q }}">
+
+          <select name="rating">
+            {% set current = user_ratings.get(m["movie_id"], None) %}
+            {% for r in [0,1,2,3,4,5] %}
+              <option value="{{ r }}" {% if current is not none and current == r %}selected{% endif %}>
+                {{ r }}{% if r == 0 %} (clear){% endif %}
+              </option>
+            {% endfor %}
+          </select>
+
+          <button type="submit">Save Rating</button>
+        </form>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    No movies found.
+  </div>
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const forms = document.querySelectorAll(".ajax-rate-form");
+
+  forms.forEach(form => {
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const movieId = formData.get("movie_id");
+      const rating = Number(formData.get("rating"));
+
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          body: formData,
+          headers: {
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          alert(data.message || "Could not save rating.");
+          return;
+        }
+
+        const movieCard = document.getElementById(`movie-${movieId}`);
+        if (movieCard && rating > 0) {
+          movieCard.remove();
+        }
+      } catch (error) {
+        console.error("Error saving rating:", error);
+        alert("Something went wrong while saving the rating.");
+      }
+    });
+  });
+});
+</script>
+
+{% endblock %}
