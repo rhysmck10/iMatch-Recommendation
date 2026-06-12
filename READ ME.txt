@@ -8,4 +8,4 @@
 
 4- Register to create a username and password, and then login.
 
-5- Begin rating movies to be recommended new ones. (5 movies have to be liked to display recommendations).
+5- Begin rating movies to be recommended new ones. (5 movies have to be liked to display recommendations!).
